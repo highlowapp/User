@@ -10,7 +10,7 @@ username = "username"
 password = "password"
 database = "database"
 
-@app.route("/get/<property>", methods=["POST"])
+@app.route("/get/<string:property>", methods=["POST"])
 def get(property):
     #Get token from Authorization
     token = request.headers["Authorization"].replace("Bearer ", "")
@@ -37,7 +37,7 @@ def get(property):
     return "{ '" + property + "': '" + prprty + "'}"
 
 
-@app.route("/set/<property>", methods=["POST"])
+@app.route("/set/<string:property>", methods=["POST"])
 def set(property):
     #Get token from Authorization
     token = request.headers["Authorization"].replace("Bearer ", "")
