@@ -4,13 +4,22 @@ import requests
 
 app = Flask(__name__)
 
-@app.route("/get_user", methods=["POST"])
-def get_user():
-    #Create a payload
-    payload = { 'token': request.form["token"] }
+#MySQL credentials
+host = "MySQLhostname"
+username = "username"
+password = "password"
+database = "database"
+
+@app.route("/get/<property>", methods=["POST"])
+def get(property):
+    #Get token from Authorization
+    token = request.headers["Authorization"].replace("Bearer ", "")
+
+    #Create the headers
+    headers = { 'Authorization': "Bearer " + token }
 
     #Make a request to the Auth service
-    token_verification_request = requests.get("https://auth_service/verify_token", params=payload)
+    token_verification_request = requests.post("https://auth_service/verify_token", headers=headers)
 
     #Obtain the result as JSON
     result = token_verification_request.json()
@@ -19,7 +28,42 @@ def get_user():
     if "error" in result:
         return "{ 'error': '" + result["error"] + "' }"
 
-    return "{ uid: '" + result["uid"] + "' }"
+    #Otherwise, get the user
+    user = User(result["uid"], host, username, password, database)
+
+    #Get the specified property
+    prprty = getattr(user, property)
+
+    return "{ '" + property + "': '" + prprty + "'}"
+
+
+@app.route("/set/<property>", methods=["POST"])
+def set(property):
+    #Get token from Authorization
+    token = request.headers["Authorization"].replace("Bearer ", "")
+
+    #Create the headers
+    headers = { 'Authorization': "Bearer " + token }
+
+    #Make a request to the Auth service
+    token_verification_request = requests.post("https://auth_service/verifyt_token", headers=headers)
+
+    #Obtain the result as JSON
+    result = token_verification_request.json()
+
+    #If there was an error, return the error
+    if "error" in result:
+        return "{ 'error': '" + result["error"] + "' }"
+
+
+    #Otherwise, get the user
+    user = User(result["uid"], host, username, password, database)
+
+    #Set the specified property
+    user.set_column(property, request.form["value"])
+
+    return "{ 'status': 'success' }"
+
 
 
 if __name__ == '__main__':
