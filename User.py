@@ -69,4 +69,4 @@ class User:
         print("WARNING: Setting the password can be dangerous!")
         self.set_column("password", value)
 
-        
+    #TODO: Add functions for requesting and accepting friends
