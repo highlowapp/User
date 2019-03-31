@@ -5,10 +5,10 @@ import requests
 app = Flask(__name__)
 
 #MySQL credentials
-host = "MySQLhostname"
-username = "username"
-password = "password"
-database = "database"
+host = "192.168.1.250"
+username = "highlow"
+password = "highlow"
+database = "highlow"
 
 @app.route("/get/<string:property>", methods=["POST"])
 def get(property):
@@ -19,14 +19,14 @@ def get(property):
     headers = { 'Authorization': "Bearer " + token }
 
     #Make a request to the Auth service
-    token_verification_request = requests.post("https://auth_service/verify_token", headers=headers)
+    token_verification_request = requests.post("http://main-server:5002/verify_token", headers=headers)
 
     #Obtain the result as JSON
     result = token_verification_request.json()
 
     #If there was an error, return the error
     if "error" in result:
-        return "{ 'error': '" + result["error"] + "' }"
+        return '{ "error": "' + result["error"] + '" }'
 
     #Otherwise, get the user
     user = User(result["uid"], host, username, password, database)
@@ -34,7 +34,7 @@ def get(property):
     #Get the specified property
     prprty = getattr(user, property)
 
-    return "{ '" + property + "': '" + prprty + "'}"
+    return '{ "' + property + '": "' + prprty + '"}'
 
 
 @app.route("/set/<string:property>", methods=["POST"])
@@ -53,7 +53,7 @@ def set(property):
 
     #If there was an error, return the error
     if "error" in result:
-        return "{ 'error': '" + result["error"] + "' }"
+        return '{ "error": "' + result["error"] + '" }'
 
 
     #Otherwise, get the user
@@ -62,7 +62,7 @@ def set(property):
     #Set the specified property
     user.set_column(property, request.form["value"])
 
-    return "{ 'status': 'success' }"
+    return '{ "status": "success" }'
 
 
 
