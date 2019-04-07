@@ -1,14 +1,17 @@
 from flask import Flask, request
 from User import User
 import requests
+import Helpers
 
 app = Flask(__name__)
 
 #MySQL credentials
-host = "192.168.1.250"
-username = "highlow"
-password = "highlow"
-database = "highlow"
+mysql_config = Helpers.read_json_from_file("config/mysql_config.json")
+
+host = mysql_config["host"]
+username = mysql_config["username"]
+password = mysql_config["password"]
+database = mysql_config["database"]
 
 @app.route("/get/<string:property>", methods=["POST"])
 def get(property):
