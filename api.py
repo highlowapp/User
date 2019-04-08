@@ -8,6 +8,9 @@ app = Flask(__name__)
 #MySQL credentials
 mysql_config = Helpers.read_json_from_file("config/mysql_config.json")
 
+#Auth service
+auth_service = Helpers.service("auth")
+
 host = mysql_config["host"]
 username = mysql_config["username"]
 password = mysql_config["password"]
@@ -22,7 +25,7 @@ def get(property):
     headers = { 'Authorization': "Bearer " + token }
 
     #Make a request to the Auth service
-    token_verification_request = requests.post("http://main-server:5002/verify_token", headers=headers)
+    token_verification_request = requests.post("http://{}/verify_token".format(auth_service), headers=headers)
 
     #Obtain the result as JSON
     result = token_verification_request.json()
@@ -49,7 +52,7 @@ def set(property):
     headers = { 'Authorization': "Bearer " + token }
 
     #Make a request to the Auth service
-    token_verification_request = requests.post("https://auth_service/verifyt_token", headers=headers)
+    token_verification_request = requests.post("https://{}/verify_token".format(auth_service), headers=headers)
 
     #Obtain the result as JSON
     result = token_verification_request.json()
