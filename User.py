@@ -69,4 +69,23 @@ class User:
         print("WARNING: Setting the password can be dangerous!")
         self.set_column("password", value)
 
-    #TODO: Add functions for requesting and accepting friends
+    def request_friend(self, uid):
+        conn = pymysql.connect(self.host, self.username, self.password, self.database)
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO friends(initiator, acceptor, status) VALUES(" + self.uid + ", " + uid + ", 1)")
+        conn.commit()
+        conn.close()
+
+    def reject_friend(self, uid):
+        conn = pymysql.connect(self.host, self.username, self.password, self.database)
+        cursor = conn.cursor()
+        cursor.execute("UPDATE friends SET status=0 WHERE initiator=" + self.uid + " AND acceptor=" + uid + "")
+        conn.commit()
+        conn.close()
+
+    def accept_friend(self, uid):
+        conn = pymysql.connect(self.host, self.username, self.password, self.database)        
+        cursor = conn.cursor()
+        cursor.execute("UPDATE friends SET status=2 WHERE initiator=" + self.uid + " AND acceptor=" + uid + "")
+        conn.commit()
+        conn.close()
