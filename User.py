@@ -70,16 +70,16 @@ class User:
         self.set_column("password", value)
 
     def request_friend(self, uid):
-        conn = pymysql.connect(self.host, self.sqlusername, self.password, self.database, cursorclass=pymysql.cursors.DictCursor)
+        conn = pymysql.connect(self.host, self.username, self.password, self.database)
         cursor = conn.cursor()
         cursor.execute("INSERT INTO friends(initiator, acceptor, status) VALUES(" + self.uid + ", " + uid + ", 1)")
 
     def reject_friend(self, uid):
-        conn = pymysql.connect(self.host, self.sqlusername, self.password, self.database, cursorclass=pymysql.cursors.DictCursor)
+        conn = pymysql.connect(self.host, self.username, self.password, self.database)
         cursor = conn.cursor()
         cursor.execute("UPDATE friends SET status=0 WHERE initiator=" + self.uid + " AND acceptor=" + uid + "")
 
     def accept_friend(self, uid):
-        conn = pymysql.connect(self.host, self.sqlusername, self.password, self.database, cursorclass=pymysql.cursors.DictCursor)
+        conn = pymysql.connect(self.host, self.username, self.password, self.database)        
         cursor = conn.cursor()
         cursor.execute("UPDATE friends SET status=2 WHERE initiator=" + self.uid + " AND acceptor=" + uid + "")
