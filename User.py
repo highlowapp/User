@@ -1,10 +1,11 @@
 import pymysql
+import bleach
 
 class User:
 
     #Define initialization function
     def __init__(self, uid, host, username, password, database):
-        self.uid = uid
+        self.uid = bleach.clean(uid)
         self.host = host
         self.username = username
         self.password = password
@@ -45,6 +46,10 @@ class User:
         #Connect to MySQL
         conn = pymysql.connect(self.host, self.username, self.password, self.database)
         cursor = conn.cursor()
+
+        #Clean the values
+        column = bleach.clean(column)
+        value = bleach.clean(value)
 
         #Attempt to set the column
         cursor.execute("UPDATE users SET " + column + "'" + value + "' WHERE uid='" + self.uid + "';")
