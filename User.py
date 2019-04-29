@@ -11,7 +11,9 @@ class User:
         self.password = password
         self.database = database
         
-
+        #Run tests
+        self.run_tests()
+        
         ## Get the user's data from MySQL ##
 
         #Connect to MySQL
@@ -106,3 +108,46 @@ class User:
 
         conn.commit()
         conn.close()
+        
+    #These are the unit tests
+    def init_test(self):
+        result = User(self.uid, self.host, self.username, self.password, self.database)
+
+        if result == "user-no-exist":
+            print("init_test was not a success")
+        else:
+            print("init_test was a success")
+
+   
+    def set_column_tests(self):
+        conn = pymysql.connect(self.host, self.username, self.password, self.database, cursorclass=pymysql.cursors.DictCursor)
+        cursor = conn.cursor()
+       
+        self.set_firstname("Firstname")
+        self.set_lastname("Lastname")
+        self.set_email("test@example.com")
+        self.set_profileimage("MyImage")
+        self.set_password("test")
+        
+        cursor.execute(
+            "SELECT * FROM " + self.database +  "WHERE firstname = 'Firstname'" 
+            "AND lastname = 'Lastname'" 
+            "AND email = 'test@gmail.com'" 
+            "AND profileimage = 'MyImage';"
+        )
+
+        row_count = cursor.rowcount
+        print("number of affected rows: {}".format(row_count))
+
+        if row_count == 0:
+            print("Setting columns was not a success")
+        else:
+            print("Setting columns was a success")
+
+       
+
+        #TODO add the rest of the tests
+
+    def run_tests(self):
+        self.init_test()
+        self.set_column_tests()
