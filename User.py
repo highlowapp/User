@@ -1,5 +1,10 @@
 import pymysql
 import bleach
+import requests
+import Helpers
+
+services = Helpers.read_json_from_file("config/services.json")
+auth_service = services["auth"]
 
 class User:
 
@@ -106,3 +111,150 @@ class User:
 
         conn.commit()
         conn.close()
+        
+    def init_test(self):
+        try:
+            user = User(self.uid, self.host, self.username, self.password, self.database)
+
+            print("init_test was a success")
+        except ValueError:
+            print("init_test was not a success")
+
+   
+    def set_column_tests(self):
+        conn = pymysql.connect(self.host, self.username, self.password, self.database, cursorclass=pymysql.cursors.DictCursor)
+        cursor = conn.cursor()
+       
+        self.set_firstname("Firstname")
+        self.set_lastname("Lastname")
+        self.set_email("test@example.com")
+        self.set_profileimage("MyImage")
+        self.set_password("test")
+        
+        cursor.execute(
+            "SELECT * FROM " + self.database +  "WHERE firstname = 'Firstname'" 
+            "AND lastname = 'Lastname'" 
+            "AND email = 'test@gmail.com'" 
+            "AND profileimage = 'MyImage';"
+        )
+
+        row_count = cursor.rowcount
+        print("number of affected rows: {}".format(row_count))
+
+        if row_count == 0:
+            print("Setting columns was not a success")
+        else:
+            print("Setting columns was a success")
+
+       
+    def accept_friend_test(self):
+        data = {
+                
+            "firstname":"Firstname2",
+            "lastname":"Lastname2",
+            "email":"test2@example.com",
+            "password":"longpassword2",
+            "confirmpassword":"longpassword2",
+            "profileimage":"MyImage2"
+
+            }
+        r = requests.post("https://" + auth_service + "/sign_up", data=data)
+        token = r.text
+        verification = Helpers.verify_token(token)
+        if "error" in verification:
+            print("couldn't verify token")
+            return False
+        uid = verification["uid"]          
+
+        user1 = self.uid
+
+        user2 = uid 
+
+        self.request_friend(user2)
+
+        user2 = User(uid, self.host, self.username, self.password, self.database)
+
+        user2.accept_friend(user1)
+
+        conn = pymysql.connect(self.host, self.username, self.password, self.database)        
+        cursor = conn.cursor()
+            
+        cursor.execute(
+            "SELECT FROM friends WHERE initiator=" + user1 + 
+            "AND acceptor=" + user2 + 
+            "AND status=2"
+            )
+        row = cursor.fetchone
+
+        if row == None:
+            print("There was an error in accept_friend_test")
+            return False
+        else:
+            print("Everything went fine in accept_friend_test")
+
+        cursor.execute(
+            "DELETE FROM friends WHERE email='test@example.com';"
+            "DELETE FROM friends WHERE email='test2@example.com';"
+            )   
+        conn.commit()
+        conn.close() 
+
+
+    def reject_friend_test(self):
+        data = {
+                
+            "firstname":"Firstname2",
+            "lastname":"Lastname2",
+            "email":"test2@example.com",
+            "password":"longpassword2",
+            "confirmpassword":"longpassword2",
+            "profileimage":"MyImage2"
+
+            }
+        r = requests.post("https://" + auth_service + "/sign_up", data=data)
+        token = r.text
+        verification = Helpers.verify_token(token)
+        if "error" in verification:
+            print("couldn't verify token")
+            return False
+        uid = verification["uid"]          
+
+        user1 = self.uid
+
+        user2 = uid 
+
+        self.request_friend(user2)
+
+        user2 = User(uid, self.host, self.username, self.password, self.database)
+
+        user2.reject_friend(user1)
+
+        conn = pymysql.connect(self.host, self.username, self.password, self.database)        
+        cursor = conn.cursor()
+            
+        cursor.execute(
+            "SELECT FROM friends WHERE initiator=" + user1 + 
+            "AND acceptor=" + user2 + 
+            "AND status=0"
+            )
+        row = cursor.fetchone
+
+        if row == None:
+            print("There was an error in reject_friend_test")
+            return False
+        else:
+            print("Everything went fine in reject_friend_test")
+
+        cursor.execute(
+            "DELETE FROM friends WHERE email='test@example.com';"
+            "DELETE FROM friends WHERE email='test2@example.com';"
+            )   
+        conn.commit()
+        conn.close()       
+
+
+    def run_tests(self):
+        self.init_test()
+        self.set_column_tests()
+        self.accept_friend_test()
+        self.reject_friend_test()
